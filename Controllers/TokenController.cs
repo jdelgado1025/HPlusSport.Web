@@ -37,7 +37,7 @@ namespace HPlusSport.Web.Controllers
             //User doesn't exist or the password does not match
             if(user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                return Unauthorized(user);
+                return Unauthorized();
             }
 
             //User was authorized
