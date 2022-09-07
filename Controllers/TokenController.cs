@@ -2,7 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using NuGet.Protocol.Core.Types;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using static HPlusSport.Web.Areas.Identity.Pages.Account.LoginModel;
 
 namespace HPlusSport.Web.Controllers
@@ -13,9 +18,11 @@ namespace HPlusSport.Web.Controllers
     {
         //UserManager from Identity to validate Username/Password is valid to generate a token
         private readonly UserManager<HPlusSportWebUser> _userManager;
-        public TokenController(UserManager<HPlusSportWebUser> userManager)
+        private IOptions<SymmetricSecurityOptions> _keyOptions;
+        public TokenController(UserManager<HPlusSportWebUser> userManager, IOptions<SymmetricSecurityOptions> keyOptions)
         {
             _userManager = userManager;
+            _keyOptions = keyOptions;
         }
 
         [HttpPost]
@@ -30,6 +37,32 @@ namespace HPlusSport.Web.Controllers
             {
                 return Unauthorized(user);
             }
+
+            //User was authorized
+            var authClaims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_keyOptions.Value.Key));
+
+            var tokenDescriptor = new SecurityTokenDescriptor()
+            {
+                Subject = new ClaimsIdentity(authClaims),
+                Expires = DateTime.Now.AddHours(1),
+                SigningCredentials = new SigningCredentials(
+                    key, SecurityAlgorithms.HmacSha512Signature)
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return Ok(new
+            {
+                token = tokenHandler.WriteToken(token),
+                expires = token.ValidTo
+            });
         }
     }
 }
