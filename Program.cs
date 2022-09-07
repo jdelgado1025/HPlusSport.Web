@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using HPlusSport.Web.Data;
 using HPlusSport.Web.Areas.Identity.Data;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("HPlusSportWebContextConnection") ?? throw new InvalidOperationException("Connection string 'HPlusSportWebContextConnection' not found.");
@@ -20,6 +22,24 @@ builder.Services.AddControllers(); //To generate a token
 //Options Pattern Registration
 builder.Services.Configure<SymmetricSecurityOptions>(
     builder.Configuration.GetSection(SymmetricSecurityOptions.Security));
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication()
+    .AddJwtBearer(options =>
+    {
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(
+                builder.Configuration.GetSection(nameof(SymmetricSecurityOptions))
+                .Get<SymmetricSecurityOptions>().Key));
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            IssuerSigningKey = key
+        };
+    });
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
