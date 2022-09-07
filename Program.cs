@@ -1,3 +1,4 @@
+global using HPlusSport.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using HPlusSport.Web.Data;
@@ -16,6 +17,9 @@ builder.Services.AddDefaultIdentity<HPlusSportWebUser>(options => options.SignIn
 builder.Services.AddRazorPages();
 builder.Services.AddControllers(); //To generate a token
 
+//Options Pattern Registration
+builder.Services.Configure<SymmetricSecurityOptions>(
+    builder.Configuration.GetSection(SymmetricSecurityOptions.Security));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
