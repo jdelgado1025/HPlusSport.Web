@@ -29,8 +29,7 @@ builder.Services.AddAuthentication()
     {
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(
-                builder.Configuration.GetSection(nameof(SymmetricSecurityOptions))
-                .Get<SymmetricSecurityOptions>().Key));
+                builder.Configuration.GetValue<string>("Security:Key")));
         options.SaveToken = true;
         options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters
