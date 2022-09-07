@@ -1,4 +1,6 @@
 ﻿using HPlusSport.Web.Areas.Identity.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +28,7 @@ namespace HPlusSport.Web.Controllers
         }
 
         [HttpPost]
-        [Route("login")]
+        [Route("Login")]
         public async Task<IActionResult> Login([FromBody] InputModel model)
         {
             //Check if the user exists
@@ -63,6 +65,19 @@ namespace HPlusSport.Web.Controllers
                 token = tokenHandler.WriteToken(token),
                 expires = token.ValidTo
             });
+        }
+
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("Products")]
+        public async Task<IActionResult> GetProducts()
+        {
+            var httpClient = new HttpClient();
+
+            var response = await httpClient.GetAsync("https://localhost:7078/products");
+            var data = response.Content.ReadAsStringAsync();
+
+            return Ok(data);
         }
     }
 }
