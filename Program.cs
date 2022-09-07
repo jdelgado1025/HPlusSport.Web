@@ -14,6 +14,7 @@ builder.Services.AddDefaultIdentity<HPlusSportWebUser>(options => options.SignIn
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddControllers(); //To generate a token
 
 var app = builder.Build();
 
@@ -34,5 +35,6 @@ app.UseAuthentication();;
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers();
 
 app.Run();
