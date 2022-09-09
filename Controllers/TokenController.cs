@@ -53,7 +53,7 @@ namespace HPlusSport.Web.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(authClaims),
-                Expires = DateTime.Now.AddHours(1),
+                Expires = System.DateTime.UtcNow.AddMinutes(60),
                 SigningCredentials = new SigningCredentials(
                     key, SecurityAlgorithms.HmacSha512Signature)
             };
